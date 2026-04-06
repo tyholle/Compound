@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Compound">
+<title>Compound</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:         #f5f0e0;
+    --surface:    #ffffff;
+    --surface2:   #f7f4ee;
+    --surface3:   #ede6d4;
+    --border:     #e0d8c8;
+    --border2:    #cfc4ae;
+    --accent:     #2d5a27;
+    --accent2:    #3d7234;
+    --accent-dim: rgba(45,90,39,0.07);
+    --accent-dim2:rgba(61,114,52,0.09);
+    --white:      #1a0e04;
+    --text:       #1a0e04;
+    --text-mid:   #4a3020;
+    --text-dim:   #8a7060;
+    --green:      #2d5a27;
+    --green-dim:  rgba(45,90,39,0.10);
+    --red:        #a04030;
+    --gold:       #2d5a27;
+  }
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+
+body{
+background:var(–bg);
+color:var(–text);
+font-family:‘DM Sans’,sans-serif;
+min-height:100vh;
+max-width:430px;
+margin:0 auto;
+overflow-x:hidden;
+}
+
+/* grain */
+body::after{
+content:’’;
+position:fixed;inset:0;
+background-image:url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘300’ height=‘300’%3E%3Cfilter id=‘n’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.75’ numOctaves=‘4’ stitchTiles=‘stitch’/%3E%3C/filter%3E%3Crect width=‘300’ height=‘300’ filter=‘url(%23n)’ opacity=‘0.05’/%3E%3C/svg%3E”);
+pointer-events:none;z-index:0;opacity:.35;
+}
+
+/* TABS */
+.tab-bar{
+position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+width:100%;max-width:430px;
+background:rgba(245,240,224,.97);backdrop-filter:blur(24px);
+border-top:1px solid var(–border);
+display:flex;z-index:100;
+padding-bottom:env(safe-area-inset-bottom);
+}
+.tab{
+flex:1;padding:13px 0 11px;text-align:center;cursor:pointer;
+font-family:‘DM Mono’,monospace;font-size:9px;letter-spacing:.1em;
+color:var(–text-dim);text-transform:uppercase;transition:color .25s;
+}
+.tab.active{color:var(–accent);}
+.tab-icon{display:block;font-size:17px;margin-bottom:3px;}
+
+/* SCREENS */
+.screen{display:none;padding:0 0 110px;min-height:100vh;position:relative;z-index:1;}
+.screen.active{display:block;}
+
+/* HEADER */
+.header{
+padding:54px 20px 18px;
+border-bottom:1px solid var(–border);
+}
+.header-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;}
+.app-name{
+font-family:‘Cormorant Garamond’,serif;font-size:32px;font-weight:700;
+letter-spacing:.02em;color:#1a0e04;line-height:1;
+}
+.app-sub{font-family:‘DM Mono’,monospace;font-size:9px;letter-spacing:.1em;color:var(–text-dim);text-transform:uppercase;margin-top:3px;}
+.date-label{font-family:‘DM Mono’,monospace;font-size:10px;color:var(–text-mid);letter-spacing:.05em;text-align:right;line-height:1.7;}
+
+/* XP */
+.xp-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;}
+.level-badge{
+font-family:‘DM Mono’,monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+color:var(–accent);background:none;
+border:none;padding:0;
+}
+.xp-numbers{font-family:‘DM Mono’,monospace;font-size:10px;color:var(–text-dim);}
+.xp-bar-track{height:2px;background:var(–border2);border-radius:1px;overflow:hidden;}
+.xp-bar-fill{height:100%;background:var(–accent);border-radius:1px;transition:width .7s cubic-bezier(.4,0,.2,1);}
+.today-xp{font-family:‘DM Mono’,monospace;font-size:10px;color:var(–text-dim);margin-top:7px;text-align:right;}
+.today-xp span{color:var(–gold);font-weight:500;}
+
+/* PROMPT */
+.prompt-card{margin:14px 16px 0;background:var(–surface);border:1px solid var(–border2);border-radius:10px;overflow:hidden;}
+.prompt-top{display:flex;align-items:center;gap:8px;padding:12px 16px 0;}
+.theme-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.prompt-theme-label{font-family:‘DM Mono’,monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(–text-dim);}
+.prompt-text{font-family:‘Cormorant Garamond’,serif;font-size:19px;font-weight:600;line-height:1.45;color:#1a0e04;padding:10px 16px 14px;}
+.prompt-actions{display:flex;border-top:1px solid var(–border);}
+.prompt-btn{
+flex:1;padding:11px;background:none;border:none;
+color:var(–text-dim);font-family:‘DM Mono’,monospace;font-size:9px;
+letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:color .2s,background .2s;
+}
+.prompt-btn:active{background:var(–surface2);}
+.prompt-btn+.prompt-btn{border-left:1px solid var(–border);}
+.prompt-btn.done{color:var(–green);}
+
+/* STATS */
+.stats-row{display:flex;gap:8px;padding:14px 16px 0;}
+.stat-card{flex:1;background:var(–surface);border:1px solid var(–border);border-radius:8px;padding:12px 10px;text-align:center;}
+.stat-number{font-family:‘Cormorant Garamond’,serif;font-size:26px;font-weight:700;color:var(–accent);line-height:1;}
+.stat-label{font-family:‘DM Mono’,monospace;font-size:8px;letter-spacing:.09em;text-transform:uppercase;color:var(–text-dim);margin-top:4px;}
+
+/* SECTION LABEL */
+.section-label{font-family:‘DM Mono’,monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(–text-dim);padding:18px 16px 8px;}
+
+/* HABITS */
+.habit-list{padding:0 16px;display:flex;flex-direction:column;gap:7px;}
+.habit-item{
+background:var(–surface);border:1px solid var(–border);border-radius:10px;
+overflow:hidden;transition:border-color .25s;
+animation:fadeUp .35s ease both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.habit-item:nth-child(1){animation-delay:.04s}
+.habit-item:nth-child(2){animation-delay:.08s}
+.habit-item:nth-child(3){animation-delay:.12s}
+.habit-item:nth-child(4){animation-delay:.16s}
+.habit-item:nth-child(5){animation-delay:.20s}
+.habit-item:nth-child(6){animation-delay:.24s}
+.habit-item.completed{border-color:rgba(141,184,112,.25);background:rgba(141,184,112,.03);}
+.habit-main{display:flex;align-items:center;padding:13px 14px;gap:12px;cursor:pointer;user-select:none;}
+.habit-check{
+width:22px;height:22px;border-radius:50%;border:1.5px solid var(–border2);
+display:flex;align-items:center;justify-content:center;flex-shrink:0;
+font-size:10px;transition:all .2s;color:transparent;
+}
+.habit-item.completed .habit-check{background:var(–green);border-color:var(–green);color:#f0e9dc;}
+.habit-item.partial .habit-check{border-color:var(–accent2);color:var(–accent2);font-size:9px;}
+.habit-info{flex:1;min-width:0;}
+.habit-name{font-size:14px;font-weight:500;color:var(–text);transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.habit-item.completed .habit-name{color:var(–text-dim);text-decoration:line-through;}
+.habit-meta{font-family:‘DM Mono’,monospace;font-size:9px;color:var(–text-dim);margin-top:2px;letter-spacing:.04em;}
+.habit-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.habit-xp{font-family:‘DM Mono’,monospace;font-size:10px;color:var(–text-dim);transition:color .2s;}
+.habit-item.completed .habit-xp{color:var(–green);}
+.habit-item.partial .habit-xp{color:var(–gold);}
+.expand-chevron{font-size:9px;color:var(–text-dim);transition:transform .2s;}
+.habit-item.expanded .expand-chevron{transform:rotate(180deg);}
+
+/* partial bar */
+.partial-bar{height:2px;background:var(–border);margin:0 14px;display:none;}
+.habit-item.expanded .partial-bar,.habit-item.partial .partial-bar{display:block;}
+.partial-bar-fill{height:100%;background:var(–accent);transition:width .3s ease;}
+
+/* SUB HABITS */
+.sub-habits{display:none;flex-direction:column;border-top:1px solid var(–border);padding:6px 14px 10px;}
+.habit-item.expanded .sub-habits{display:flex;}
+.sub-habit{display:flex;align-items:center;gap:10px;padding:9px 0;cursor:pointer;border-bottom:1px solid var(–border);user-select:none;}
+.sub-habit:last-child{border-bottom:none;}
+.sub-check{
+width:15px;height:15px;border-radius:3px;border:1.5px solid var(–border2);
+display:flex;align-items:center;justify-content:center;flex-shrink:0;
+font-size:8px;transition:all .2s;color:transparent;
+}
+.sub-habit.checked .sub-check{background:var(–green);border-color:var(–green);color:#f0e9dc;}
+.sub-name{flex:1;font-size:13px;color:var(–text-mid);transition:all .2s;}
+.sub-habit.checked .sub-name{color:var(–text-dim);text-decoration:line-through;}
+.sub-duration{font-family:‘DM Mono’,monospace;font-size:9px;color:var(–text-dim);}
+
+/* EDIT TRIGGER */
+.edit-trigger{padding:16px 16px 0;display:flex;justify-content:center;}
+.edit-btn{
+background:none;border:1px solid var(–border2);border-radius:6px;padding:9px 22px;
+color:var(–text-dim);font-family:‘DM Mono’,monospace;font-size:9px;
+letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s;
+}
+.edit-btn:active{color:var(–accent);border-color:var(–accent2);}
+
+/* PROGRESS */
+.progress-header{padding:54px 20px 20px;border-bottom:1px solid var(–border);}
+.progress-title{font-family:‘Cormorant Garamond’,serif;font-size:32px;font-weight:700;color:#1a0e04;}
+.progress-section{padding:0 16px;}
+.level-card{background:var(–surface);border:1px solid var(–border2);border-radius:10px;padding:18px;margin:14px 0 10px;}
+.level-card-name{font-family:‘Cormorant Garamond’,serif;font-size:28px;font-weight:700;color:var(–gold);margin-bottom:2px;}
+.level-card-sub{font-family:‘DM Mono’,monospace;font-size:9px;letter-spacing:.08em;color:var(–text-dim);text-transform:uppercase;margin-bottom:16px;}
+.level-bar-track{height:3px;background:var(–border2);border-radius:2px;overflow:hidden;margin-bottom:7px;}
+.level-bar-fill{height:100%;background:var(–accent);border-radius:2px;transition:width .8s cubic-bezier(.4,0,.2,1);}
+.level-bar-labels{display:flex;justify-content:space-between;font-family:‘DM Mono’,monospace;font-size:9px;color:var(–text-dim);}
+.levels-list{background:var(–surface);border:1px solid var(–border);border-radius:10px;overflow:hidden;margin-bottom:12px;}
+.level-row{display:flex;align-items:center;padding:11px 16px;border-bottom:1px solid var(–border);gap:10px;}
+.level-row:last-child{border-bottom:none;}
+.level-row.current{background:var(–accent-dim2);}
+.level-dot{width:7px;height:7px;border-radius:50%;background:var(–border2);flex-shrink:0;}
+.level-row.current .level-dot,.level-row.achieved .level-dot{background:var(–accent2);}
+.level-row-name{flex:1;font-size:13px;color:var(–text-dim);}
+.level-row.current .level-row-name{color:var(–gold);font-weight:500;}
+.level-row.achieved .level-row-name{color:var(–text-mid);}
+.level-row-xp{font-family:‘DM Mono’,monospace;font-size:9px;color:var(–text-dim);}
+.habit-streaks-card{background:var(–surface);border:1px solid var(–border);border-radius:10px;overflow:hidden;margin-bottom:12px;}
+.habit-streak-row{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(–border);gap:10px;}
+.habit-streak-row:last-child{border-bottom:none;}
+.habit-streak-name{flex:1;font-size:13px;color:var(–text-mid);}
+.habit-streak-val{font-family:‘DM Mono’,monospace;font-size:11px;color:var(–gold);text-align:right;}
+.habit-streak-sub{font-family:‘DM Mono’,monospace;font-size:8px;color:var(–text-dim);letter-spacing:.06em;}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(26,14,4,.45);z-index:200;backdrop-filter:blur(6px);align-items:flex-end;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{width:100%;max-width:430px;background:var(–surface);border-radius:16px 16px 0 0;border-top:1px solid var(–border2);max-height:88vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,20px);}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:18px 20px 16px;border-bottom:1px solid var(–border);position:sticky;top:0;background:var(–surface);z-index:10;}
+.modal-title{font-family:‘Cormorant Garamond’,serif;font-size:22px;font-weight:600;color:#1a0e04;}
+.modal-close{width:28px;height:28px;background:var(–surface2);border:1px solid var(–border);border-radius:50%;color:var(–text-mid);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.modal-note{font-family:‘DM Mono’,monospace;font-size:9px;color:var(–text-dim);letter-spacing:.06em;line-height:1.6;padding:10px 20px;border-bottom:1px solid var(–border);}
+
+.edit-habit-block{border-bottom:1px solid var(–border);padding:14px 20px;}
+.edit-habit-block:last-of-type{border-bottom:none;}
+.edit-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.edit-row:last-child{margin-bottom:0;}
+.edit-field-label{font-family:‘DM Mono’,monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(–text-dim);width:50px;flex-shrink:0;}
+.edit-input{flex:1;background:var(–surface2);border:1px solid var(–border2);border-radius:5px;padding:7px 10px;color:var(–text);font-family:‘DM Sans’,sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+.edit-input:focus{border-color:var(–accent2);}
+
+.xp-adjuster{display:flex;align-items:center;background:var(–surface2);border:1px solid var(–border2);border-radius:5px;overflow:hidden;}
+.xp-adj-btn{width:30px;height:32px;background:none;border:none;color:var(–text-mid);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .2s,background .2s;}
+.xp-adj-btn:active{background:var(–surface3);color:var(–accent);}
+.xp-adj-val{font-family:‘DM Mono’,monospace;font-size:11px;color:var(–accent2);width:28px;text-align:center;}
+.xp-adj-note{font-family:‘DM Mono’,monospace;font-size:9px;color:var(–text-dim);margin-left:8px;}
+
+.edit-remove-btn{background:none;border:none;color:var(–text-dim);font-size:20px;cursor:pointer;padding:0;line-height:1;transition:color .2s;flex-shrink:0;}
+.edit-remove-btn:active{color:var(–red);}
+
+.edit-sub-list{margin-top:8px;border:1px solid var(–border);border-radius:6px;overflow:hidden;}
+.edit-sub-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(–border);}
+.edit-sub-row:last-child{border-bottom:none;}
+.edit-sub-input{flex:1;background:none;border:none;color:var(–text-mid);font-family:‘DM Sans’,sans-serif;font-size:12px;outline:none;}
+.edit-sub-dur{background:none;border:none;color:var(–text-dim);font-family:‘DM Mono’,monospace;font-size:10px;width:50px;outline:none;text-align:right;}
+.edit-sub-remove{background:none;border:none;color:var(–text-dim);font-size:16px;cursor:pointer;padding:0;transition:color .2s;}
+.edit-sub-remove:active{color:var(–red);}
+.add-sub-btn{background:none;border:none;color:var(–text-dim);font-family:‘DM Mono’,monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;padding:6px 0 0;transition:color .2s;}
+.add-sub-btn:active{color:var(–accent);}
+
+.modal-add-section{padding:16px 20px;border-top:1px solid var(–border);}
+.modal-add-title{font-family:‘DM Mono’,monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(–text-dim);margin-bottom:10px;}
+.modal-add-row{display:flex;gap:8px;}
+.modal-input{flex:1;background:var(–surface2);border:1px solid var(–border2);border-radius:6px;padding:9px 12px;color:var(–text);font-family:‘DM Sans’,sans-serif;font-size:13px;outline:none;}
+.modal-input:focus{border-color:var(–accent2);}
+.modal-add-btn{background:var(–accent2);border:none;border-radius:6px;padding:9px 16px;color:#f0e9dc;font-family:‘DM Mono’,monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;font-weight:500;white-space:nowrap;}
+
+/* XP POP */
+.xp-pop{position:fixed;pointer-events:none;font-family:‘DM Mono’,monospace;font-size:12px;color:var(–accent);font-weight:500;z-index:999;animation:xpFloat .9s ease forwards;}
+@keyframes xpFloat{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-36px)}}
+
+::-webkit-scrollbar{width:0;}
+</style>
+
+</head>
+<body>
+
+<!-- TODAY -->
+
+<div class="screen active" id="screen-today">
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="app-name">Compound</div>
+        <div class="app-sub">Every day builds</div>
+      </div>
+      <div class="date-label" id="date-label"></div>
+    </div>
+    <div class="xp-top">
+      <div class="level-badge" id="level-badge">Beginner</div>
+      <div class="xp-numbers" id="xp-numbers">0 / 1,000 XP</div>
+    </div>
+    <div class="xp-bar-track"><div class="xp-bar-fill" id="xp-bar-fill" style="width:0%"></div></div>
+    <div class="today-xp">Today: <span id="today-xp-count">0</span> / 200 XP</div>
+  </div>
+
+  <div class="prompt-card">
+    <div class="prompt-top">
+      <span class="theme-dot" id="theme-dot"></span>
+      <span class="prompt-theme-label" id="theme-name"></span>
+    </div>
+    <div class="prompt-text" id="prompt-text">…</div>
+    <div class="prompt-actions">
+      <button class="prompt-btn" onclick="refreshPrompt()">↻ New prompt</button>
+      <button class="prompt-btn" id="prompt-done-btn" onclick="togglePromptDone()">✓ Mark done</button>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-number" id="streak-count">0</div><div class="stat-label">Streak</div></div>
+    <div class="stat-card"><div class="stat-number" id="total-xp-display">0</div><div class="stat-label">Total XP</div></div>
+    <div class="stat-card"><div class="stat-number" id="days-logged">0</div><div class="stat-label">Days In</div></div>
+  </div>
+
+  <div class="section-label">Today</div>
+  <div class="habit-list" id="habit-list"></div>
+  <div class="edit-trigger"><button class="edit-btn" onclick="openEditModal()">⚙ Edit Habits</button></div>
+</div>
+
+<!-- PROGRESS -->
+
+<div class="screen" id="screen-progress">
+  <div class="progress-header"><div class="progress-title">Progress</div></div>
+  <div class="progress-section">
+    <div class="level-card">
+      <div class="level-card-name" id="prog-level-name">Beginner</div>
+      <div class="level-card-sub" id="prog-level-sub">0 XP to Building</div>
+      <div class="level-bar-track"><div class="level-bar-fill" id="prog-level-fill" style="width:0%"></div></div>
+      <div class="level-bar-labels"><span id="prog-xp-cur">0 XP</span><span id="prog-xp-next">1,000 XP</span></div>
+    </div>
+    <div class="section-label" style="padding:0 0 8px;">Levels</div>
+    <div class="levels-list" id="levels-list"></div>
+    <div class="section-label" style="padding:4px 0 8px;">Habit Streaks</div>
+    <div class="habit-streaks-card" id="habit-streaks-list"></div>
+  </div>
+</div>
+
+<!-- TABS -->
+
+<div class="tab-bar">
+  <div class="tab active" id="tab-today" onclick="switchTab('today')"><span class="tab-icon">◎</span>Today</div>
+  <div class="tab" id="tab-progress" onclick="switchTab('progress')"><span class="tab-icon">△</span>Progress</div>
+</div>
+
+<!-- EDIT MODAL -->
+
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Edit Habits</div>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="modal-note">Weight controls XP share. Total always balances to 200 XP/day.</div>
+    <div id="edit-habit-list"></div>
+    <div class="modal-add-section">
+      <div class="modal-add-title">Add Habit</div>
+      <div class="modal-add-row">
+        <input class="modal-input" id="new-habit-input" placeholder="Habit name…"/>
+        <button class="modal-add-btn" onclick="addHabit()">+ Add</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const LEVELS=[
+  {name:'Beginner',min:0},
+  {name:'Building',min:1000},
+  {name:'Consistent',min:5000},
+  {name:'Committed',min:15000},
+  {name:'Operator',min:35000},
+  {name:'Founder',min:60000},
+];
+
+const THEMES={
+  identity:{color:'#c9a96e',label:'Identity'},
+  relationships:{color:'#c07a5a',label:'Relationships'},
+  work:{color:'#7a9e6e',label:'Work'},
+};
+
+const PROMPTS={
+  identity:[
+    "Who are you becoming, and does that person excite you?",
+    "What would you do if no one was watching and nothing was at stake?",
+    "What part of yourself have you been performing rather than living?",
+    "What does success actually look like to you — not to anyone else?",
+    "What belief about yourself is holding you back the most right now?",
+    "What would the most honest version of you say about where you are today?",
+    "If your habits were your identity, who would you be?",
+    "What are you avoiding becoming, and why?",
+    "What does the 30-year version of you need you to start doing today?",
+    "What would you do differently if external validation didn't exist?",
+    "What version of yourself are you most proud of, and what made that possible?",
+    "Where are you shrinking yourself to make others comfortable?",
+    "What are you pretending not to want because it feels too ambitious?",
+    "What would you regret not trying more than you'd regret failing?",
+    "What does discipline mean to you right now, and are you living it?",
+    "What is the gap between who you say you are and how you actually spend your time?",
+    "What are you tolerating in your life that you shouldn't be?",
+    "If you couldn't talk about your goals, would your actions still show them?",
+    "What's one thing you know you should stop doing but haven't yet?",
+    "What does your inner critic say most often, and is any of it worth listening to?",
+    "What would you attempt if you knew failure was temporary?",
+    "What habit, if you never started, would your future self thank you for?",
+    "What does the word 'enough' mean to you right now?",
+    "Where do you feel most like yourself and how often are you actually there?",
+    "What are you chasing that you haven't questioned whether you actually want?",
+    "What would change if you stopped waiting for permission?",
+    "What are you currently building that will still matter in 10 years?",
+    "When did you last surprise yourself?",
+    "What part of your past are you still letting define your present?",
+    "What would you do today if you trusted yourself completely?",
+    "What does your best day look like — not your most productive, your best?",
+    "Where are you playing it safe when you know you should push?",
+    "What's the story you keep telling yourself that might not be true?",
+    "What do you want that you've never said out loud?",
+    "What would it mean to be fully yourself, without apology?",
+    "What would you do if you weren't afraid of being judged?",
+    "What's one area of your life where you're coasting when you could be growing?",
+    "What does the version of you who has nothing to prove look like?",
+    "What are you most afraid to admit about where you are right now?",
+    "What would radical honesty with yourself change about your next 30 days?",
+    "What small thing, done consistently, would make you proud a year from now?",
+    "What is your relationship with discomfort, and is it serving you?",
+  ],
+  relationships:[
+    "When did you last genuinely celebrate someone else's win?",
+    "What does it feel like when someone else succeeds at something you want?",
+    "Who in your life deserves more of your attention than they're getting?",
+    "Where does your ego show up most in your relationships?",
+    "What would it mean to be truly secure in who you are around others?",
+    "When do you feel most like yourself with other people?",
+    "What relationship habit do you want to change this month?",
+    "How do you want people to feel after spending time with you?",
+    "What would you say to someone you've been meaning to reach out to?",
+    "Where are you comparing yourself to others and what does that cost you?",
+    "What does it look like to be happy for someone without any asterisks?",
+    "Who has shown up for you lately that you haven't acknowledged?",
+    "What does it feel like to need someone, and how do you handle that?",
+    "Where are you keeping score in a relationship that shouldn't have a scoreboard?",
+    "What would you say to a close friend who was in your exact situation right now?",
+    "Who do you find it hardest to be vulnerable around and why?",
+    "What does someone have to do to earn your trust, and is that reasonable?",
+    "Where are you confusing being liked with being respected?",
+    "What relationship in your life needs a real conversation you've been avoiding?",
+    "How do you show up when you're not at your best, and who sees that version of you?",
+    "What does your girlfriend see in you that you sometimes don't see in yourself?",
+    "Where do you put up walls and what are you actually protecting?",
+    "What's the difference between how you treat strangers and how you treat the people closest to you?",
+    "When did you last ask someone how they were doing and actually mean it?",
+    "What would your closest relationships look like if you led with generosity instead of self-protection?",
+    "Where are you withholding something — attention, gratitude, an apology — that someone deserves?",
+    "What do you wish people understood about you that you've never told them?",
+    "How do you handle it when someone outperforms you in an area you care about?",
+    "What does it mean to be a great partner, and are you doing that?",
+    "Where do you mistake silence for strength in your relationships?",
+    "What would change if you assumed the best about the people around you?",
+    "Who in your life challenges you to be better and how often do you lean into that?",
+    "What do you bring to a room that you don't give yourself credit for?",
+    "Where are you performing confidence instead of actually feeling it around others?",
+    "What's one relationship you've let drift that you want to invest in again?",
+    "How do you respond when someone you love disappoints you?",
+    "What does loyalty mean to you and do you live up to your own standard of it?",
+    "When you feel defensive, what is it actually protecting?",
+    "What would it look like to fully accept someone without trying to fix them?",
+    "Where are you letting pride get in the way of connection?",
+    "What's one thing you've never said to someone important that you should?",
+    "What does it feel like to be truly seen, and how often do you let that happen?",
+  ],
+  work:[
+    "What did you actually learn yesterday — not what you did, what you learned?",
+    "What's the most important thing you're avoiding working on right now?",
+    "What would shipping something imperfect teach you that perfection never would?",
+    "What assumption about THEO are you most afraid to test?",
+    "What does your best creative work look like and when does it happen?",
+    "What would you build if you knew it couldn't fail?",
+    "What skill, if mastered, would change everything for you in 5 years?",
+    "Where are you optimizing for looking good instead of getting good?",
+    "What problem do you uniquely understand that most people don't?",
+    "What would the next level of your work actually require from you?",
+    "Are you building THEO because you believe in it, or because it sounds impressive?",
+    "What would you work on today if nobody would ever find out?",
+    "What does it mean to do deep work, and did you actually do it yesterday?",
+    "What's the difference between being busy and making progress?",
+    "What would you have to believe about yourself to take the next big step?",
+    "What's one thing you keep putting off that would unblock everything else?",
+    "Where are you confusing motion with momentum?",
+    "What would a world-class version of your work today actually look like?",
+    "What feedback have you received that you've been too proud to act on?",
+    "What does your ideal working environment look like and how close are you to it?",
+    "What would you learn this month if you could learn anything?",
+    "Where are you letting perfect be the enemy of started?",
+    "What's the hardest part of building something from nothing, and are you facing it honestly?",
+    "What are you doing today that the 30-year version of you would respect?",
+    "What would your partner say about how seriously you're taking THEO right now?",
+    "What does mastery actually feel like versus what you imagined it would feel like?",
+    "Where are you coasting on natural ability instead of putting in real work?",
+    "What would change about your output if you treated every session like it counted?",
+    "What does your relationship with failure actually look like in practice?",
+    "What's one constraint you could remove that would make your work significantly better?",
+    "What would you build differently if you started THEO from scratch today?",
+    "Where are you solving the wrong problem because it's more comfortable than the right one?",
+    "What does it mean to have taste, and do you trust yours?",
+    "What's the single most important thing you could do this week to move forward?",
+    "Where are you letting fear of judgment slow down your output?",
+    "What would it mean to be genuinely excellent at your craft, not just good enough?",
+    "What have you shipped recently that you're actually proud of?",
+    "What does your attention look like during your best work sessions versus your worst?",
+    "What are you learning right now that will compound the most over time?",
+    "Where are you avoiding the hard technical problem by working on easier things?",
+    "What would you do differently tomorrow if today was a wasted day?",
+    "What does building something meaningful actually require of you right now?",
+  ],
+};
+
+const DEFAULT_HABITS=[
+  {id:'journal',name:'Journal Prompt',meta:'Daily prompt · write in notebook',xpWeight:1,isPrompt:true,checked:false,subHabits:null},
+  {id:'italian',name:'Italian',meta:'1 hr · 4 parts',xpWeight:2,checked:false,subHabits:[
+    {id:'pimsleur',name:'Pimsleur',duration:'30 min',checked:false},
+    {id:'pronunciation',name:'Pronunciation',duration:'15 min',checked:false},
+    {id:'rrolling',name:'R Rolling',duration:'5 min',checked:false},
+    {id:'duolingo',name:'Duolingo',duration:'15 min',checked:false},
+  ]},
+  {id:'gym',name:'Gym / Stretch',meta:'Daily movement',xpWeight:1.5,checked:false,subHabits:[
+    {id:'gym-main',name:'Gym',duration:'',checked:false},
+    {id:'stretch',name:'Stretch',duration:'',checked:false},
+  ]},
+  {id:'reading',name:'Reading',meta:'30 min',xpWeight:1,checked:false,subHabits:null},
+  {id:'technical',name:'Technical Learning',meta:'3 hrs · JS, exercises, AI tools',xpWeight:2,checked:false,subHabits:null},
+  {id:'theo',name:'THEO',meta:'1 hr · exercises that move the build forward',xpWeight:2,checked:false,subHabits:null},
+];
+
+function loadState(){
+  try{const s=localStorage.getItem('compound_v2');if(s)return JSON.parse(s);}catch(e){}
+  return{habits:DEFAULT_HABITS,baseXP:0,streak:0,daysLogged:0,lastDate:null,promptDone:false,promptIdx:null,promptTheme:null,habitStreaks:{},journalHistory:[]};
+}
+function save(){localStorage.setItem('compound_v2',JSON.stringify(state));}
+let state=loadState();
+
+function todayStr(){return new Date().toISOString().split('T')[0];}
+
+function checkNewDay(){
+  const today=todayStr();
+  if(state.lastDate===today)return;
+  if(state.lastDate){
+    const prev=new Date(state.lastDate+'T12:00:00');
+    const diff=Math.round((new Date(today+'T12:00:00')-prev)/86400000);
+    if(diff===1&&allDone())state.streak++;
+    else if(diff>1)state.streak=0;
+    if(allDone())state.daysLogged++;
+    state.habits.forEach(h=>{
+      if(!state.habitStreaks[h.id])state.habitStreaks[h.id]=0;
+      if(h.checked)state.habitStreaks[h.id]++;
+      else state.habitStreaks[h.id]=0;
+    });
+    state.baseXP+=calcTodayXP();
+  }
+  state.habits.forEach(h=>{h.checked=false;if(h.subHabits)h.subHabits.forEach(s=>s.checked=false);});
+  state.promptDone=false;state.promptIdx=null;state.promptTheme=null;
+  state.lastDate=today;save();
+}
+
+function allDone(){return state.habits.every(h=>h.checked);}
+
+function rebalance(){
+  const total=state.habits.reduce((s,h)=>s+(h.xpWeight||1),0);
+  state.habits.forEach(h=>h.xpValue=Math.round((h.xpWeight||1)/total*200));
+}
+
+function calcTodayXP(){
+  rebalance();let xp=0;
+  state.habits.forEach(h=>{
+    if(h.isPrompt){if(state.promptDone)xp+=h.xpValue;}
+    else if(h.subHabits){const done=h.subHabits.filter(s=>s.checked).length;xp+=Math.round(done/h.subHabits.length*h.xpValue);}
+    else{if(h.checked)xp+=h.xpValue;}
+  });
+  return xp;
+}
+
+function totalXP(){return state.baseXP+calcTodayXP();}
+
+function getLevel(xp){
+  for(let i=LEVELS.length-1;i>=0;i--)if(xp>=LEVELS[i].min)return i;
+  return 0;
+}
+
+function initPrompt(){
+  if(state.promptTheme===null){
+    const themes=Object.keys(THEMES);
+    const d=new Date();
+    const doy=Math.floor((d-new Date(d.getFullYear(),0,0))/86400000);
+    state.promptTheme=themes[doy%themes.length];
+    state.promptIdx=Math.floor(Math.random()*PROMPTS[state.promptTheme].length);
+    save();
+  }
+  renderPrompt();
+}
+
+function renderPrompt(){
+  const t=state.promptTheme,td=THEMES[t];
+  document.getElementById('prompt-text').textContent=PROMPTS[t][state.promptIdx];
+  document.getElementById('theme-name').textContent=td.label;
+  document.getElementById('theme-dot').style.background=td.color;
+  const btn=document.getElementById('prompt-done-btn');
+  btn.classList.toggle('done',state.promptDone);
+  btn.textContent=state.promptDone?'✓ Done':'✓ Mark done';
+}
+
+function refreshPrompt(){
+  const p=PROMPTS[state.promptTheme];let idx;
+  do{idx=Math.floor(Math.random()*p.length);}while(idx===state.promptIdx&&p.length>1);
+  state.promptIdx=idx;save();renderPrompt();
+}
+
+function togglePromptDone(){
+  state.promptDone=!state.promptDone;
+  const h=state.habits.find(h=>h.isPrompt);if(h)h.checked=state.promptDone;
+  save();renderPrompt();updateAll();
+}
+
+function renderHabits(){
+  rebalance();
+  const el=document.getElementById('habit-list');el.innerHTML='';
+  state.habits.forEach(h=>{
+    const div=document.createElement('div');
+    const hasSubs=h.subHabits&&h.subHabits.length>0;
+    const checkedSubs=hasSubs?h.subHabits.filter(s=>s.checked).length:0;
+    const partialPct=hasSubs?Math.round(checkedSubs/h.subHabits.length*100):0;
+    const isPartial=hasSubs&&checkedSubs>0&&checkedSubs<h.subHabits.length;
+    let cls='habit-item';
+    if(h.checked)cls+=' completed';
+    else if(isPartial)cls+=' partial';
+    div.className=cls;div.dataset.id=h.id;
+    const chk=h.checked?'✓':(isPartial?'◐':'');
+    const xpShow=isPartial?`+${Math.round(checkedSubs/h.subHabits.length*h.xpValue)}`:`+${h.xpValue}`;
+
+    if(h.isPrompt){
+      div.innerHTML=`<div class="habit-main" onclick="togglePromptDone()">
+        <div class="habit-check">${chk}</div>
+        <div class="habit-info"><div class="habit-name">${h.name}</div><div class="habit-meta">${h.meta}</div></div>
+        <div class="habit-right"><div class="habit-xp">${xpShow} XP</div></div>
+      </div>`;
+    }else if(hasSubs){
+      div.innerHTML=`<div class="habit-main" onclick="toggleExpand('${h.id}')">
+        <div class="habit-check">${chk}</div>
+        <div class="habit-info"><div class="habit-name">${h.name}</div><div class="habit-meta">${checkedSubs}/${h.subHabits.length} complete</div></div>
+        <div class="habit-right"><div class="habit-xp">${xpShow} XP</div><div class="expand-chevron">▾</div></div>
+      </div>
+      <div class="partial-bar"><div class="partial-bar-fill" style="width:${partialPct}%"></div></div>
+      <div class="sub-habits">${h.subHabits.map((s,si)=>`
+        <div class="sub-habit${s.checked?' checked':''}" onclick="toggleSub('${h.id}',${si},event)">
+          <div class="sub-check">${s.checked?'✓':''}</div>
+          <div class="sub-name">${s.name}</div>
+          <div class="sub-duration">${s.duration}</div>
+        </div>`).join('')}</div>`;
+    }else{
+      div.innerHTML=`<div class="habit-main" onclick="toggleHabit('${h.id}')">
+        <div class="habit-check">${chk}</div>
+        <div class="habit-info"><div class="habit-name">${h.name}</div><div class="habit-meta">${h.meta}</div></div>
+        <div class="habit-right"><div class="habit-xp">${xpShow} XP</div></div>
+      </div>`;
+    }
+    el.appendChild(div);
+  });
+}
+
+function toggleExpand(id){document.querySelector(`.habit-item[data-id="${id}"]`)?.classList.toggle('expanded');}
+
+function toggleHabit(id){
+  const h=state.habits.find(h=>h.id===id);if(!h||h.isPrompt)return;
+  h.checked=!h.checked;if(h.checked)showXPPop(h.xpValue);
+  save();updateAll();
+}
+
+function toggleSub(hid,si,e){
+  e.stopPropagation();
+  const h=state.habits.find(h=>h.id===hid);if(!h?.subHabits)return;
+  h.subHabits[si].checked=!h.subHabits[si].checked;
+  h.checked=h.subHabits.every(s=>s.checked);
+  save();updateAll();
+}
+
+function showXPPop(xp){
+  const el=document.createElement('div');el.className='xp-pop';
+  el.textContent=`+${xp} XP`;el.style.cssText='left:50%;top:42%;transform:translateX(-50%)';
+  document.body.appendChild(el);setTimeout(()=>el.remove(),900);
+}
+
+function updateAll(){
+  const txp=totalXP(),todayXP=calcTodayXP();
+  const li=getLevel(txp),level=LEVELS[li],next=LEVELS[li+1];
+  const d=new Date();
+  document.getElementById('date-label').innerHTML=
+    d.toLocaleDateString('en-US',{weekday:'long'})+'<br>'+
+    d.toLocaleDateString('en-US',{month:'long',day:'numeric'});
+  document.getElementById('level-badge').textContent=level.name;
+  document.getElementById('today-xp-count').textContent=todayXP;
+  document.getElementById('streak-count').textContent=state.streak;
+  document.getElementById('total-xp-display').textContent=txp.toLocaleString();
+  document.getElementById('days-logged').textContent=state.daysLogged;
+  const inL=txp-level.min,forL=next?next.min-level.min:1;
+  const pct=next?Math.min(100,Math.round(inL/forL*100)):100;
+  document.getElementById('xp-bar-fill').style.width=pct+'%';
+  document.getElementById('xp-numbers').textContent=`${txp.toLocaleString()} / ${next?next.min.toLocaleString():'∞'} XP`;
+  renderHabits();
+  renderProgress(txp,li,next,inL,forL,pct);
+}
+
+function renderProgress(txp,li,next,inL,forL,pct){
+  if(txp===undefined){txp=totalXP();li=getLevel(txp);next=LEVELS[li+1];inL=txp-LEVELS[li].min;forL=next?next.min-LEVELS[li].min:1;pct=next?Math.min(100,Math.round(inL/forL*100)):100;}
+  document.getElementById('prog-level-name').textContent=LEVELS[li].name;
+  document.getElementById('prog-level-sub').textContent=next?`${(next.min-txp).toLocaleString()} XP to ${next.name}`:'Maximum level reached';
+  document.getElementById('prog-level-fill').style.width=pct+'%';
+  document.getElementById('prog-xp-cur').textContent=txp.toLocaleString()+' XP';
+  document.getElementById('prog-xp-next').textContent=next?next.min.toLocaleString()+' XP':'∞';
+  document.getElementById('levels-list').innerHTML=LEVELS.map((l,i)=>{
+    const cls=i===li?'current':txp>=l.min?'achieved':'';
+    return`<div class="level-row ${cls}"><div class="level-dot"></div><div class="level-row-name">${l.name}</div><div class="level-row-xp">${l.min===0?'0':l.min.toLocaleString()}+ XP</div></div>`;
+  }).join('');
+  document.getElementById('habit-streaks-list').innerHTML=state.habits.map(h=>`
+    <div class="habit-streak-row">
+      <div class="habit-streak-name">${h.name}</div>
+      <div class="habit-streak-val">${state.habitStreaks[h.id]||0}<div class="habit-streak-sub">day streak</div></div>
+    </div>`).join('');
+}
+
+function switchTab(tab){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('screen-'+tab).classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(tab==='progress')renderProgress();
+}
+
+function openEditModal(){renderEditModal();document.getElementById('edit-modal').classList.add('open');}
+function closeEditModal(){document.getElementById('edit-modal').classList.remove('open');rebalance();save();updateAll();}
+
+function renderEditModal(){
+  const c=document.getElementById('edit-habit-list');
+  c.innerHTML=state.habits.map((h,hi)=>{
+    const subHtml=h.subHabits?`
+      <div class="edit-sub-list">${h.subHabits.map((s,si)=>`
+        <div class="edit-sub-row">
+          <input class="edit-sub-input" value="${s.name}" onchange="updateSubName(${hi},${si},this.value)" placeholder="Step name"/>
+          <input class="edit-sub-dur" value="${s.duration}" onchange="updateSubDur(${hi},${si},this.value)" placeholder="time"/>
+          <button class="edit-sub-remove" onclick="removeSub(${hi},${si})">×</button>
+        </div>`).join('')}</div>
+      <button class="add-sub-btn" onclick="addSub(${hi})">+ add step</button>`:'';
+    return`<div class="edit-habit-block">
+      <div class="edit-row">
+        <div class="edit-field-label">Name</div>
+        <input class="edit-input" value="${h.name}" onchange="updateHabitName(${hi},this.value)"/>
+        ${!h.isPrompt?`<button class="edit-remove-btn" onclick="removeHabit(${hi})">×</button>`:''}
+      </div>
+      <div class="edit-row">
+        <div class="edit-field-label">Note</div>
+        <input class="edit-input" value="${h.meta||''}" onchange="updateHabitMeta(${hi},this.value)" placeholder="Description…"/>
+      </div>
+      ${!h.isPrompt?`<div class="edit-row">
+        <div class="edit-field-label">Weight</div>
+        <div class="xp-adjuster">
+          <button class="xp-adj-btn" onclick="adjustWeight(${hi},-0.5)">−</button>
+          <div class="xp-adj-val" id="w${hi}">${h.xpWeight||1}</div>
+          <button class="xp-adj-btn" onclick="adjustWeight(${hi},0.5)">+</button>
+        </div>
+        <div class="xp-adj-note">≈ ${h.xpValue||'?'} XP/day</div>
+      </div>`:''}
+      ${subHtml}
+    </div>`;
+  }).join('');
+}
+
+function updateHabitName(hi,v){state.habits[hi].name=v;save();}
+function updateHabitMeta(hi,v){state.habits[hi].meta=v;save();}
+function updateSubName(hi,si,v){state.habits[hi].subHabits[si].name=v;save();}
+function updateSubDur(hi,si,v){state.habits[hi].subHabits[si].duration=v;save();}
+
+function adjustWeight(hi,delta){
+  const h=state.habits[hi];
+  h.xpWeight=Math.max(0.5,Math.round(((h.xpWeight||1)+delta)*2)/2);
+  rebalance();save();renderEditModal();
+}
+
+function removeHabit(hi){
+  if(state.habits[hi].isPrompt)return;
+  state.habits.splice(hi,1);rebalance();save();renderEditModal();
+}
+
+function removeSub(hi,si){
+  state.habits[hi].subHabits.splice(si,1);
+  if(state.habits[hi].subHabits.length===0)state.habits[hi].subHabits=null;
+  save();renderEditModal();
+}
+
+function addSub(hi){
+  if(!state.habits[hi].subHabits)state.habits[hi].subHabits=[];
+  state.habits[hi].subHabits.push({id:'s'+Date.now(),name:'',duration:'',checked:false});
+  save();renderEditModal();
+}
+
+function addHabit(){
+  const input=document.getElementById('new-habit-input');
+  const name=input.value.trim();if(!name)return;
+  state.habits.push({id:'h'+Date.now(),name,meta:'',xpWeight:1,checked:false,subHabits:null});
+  rebalance();save();input.value='';renderEditModal();
+}
+
+// init
+checkNewDay();rebalance();initPrompt();updateAll();
+</script>
+
+</body>
+</html>
