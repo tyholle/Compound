@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:         #f5f0e0;
+    --bg:         #ede4d0;
     --surface:    #ffffff;
     --surface2:   #f7f4ee;
     --surface3:   #ede6d4;
@@ -99,7 +99,7 @@ border:none;padding:0;
 .today-xp span{color:var(–gold);font-weight:500;}
 
 /* PROMPT */
-.prompt-card{margin:14px 16px 0;background:var(–surface);border:1px solid var(–border2);border-radius:10px;overflow:hidden;}
+.prompt-card{margin:14px 16px 0;background:var(–surface);border:1px solid var(–border2);border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(60,35,10,0.08), 0 0px 1px rgba(60,35,10,0.06);}
 .prompt-top{display:flex;align-items:center;gap:8px;padding:12px 16px 0;}
 .theme-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
 .prompt-theme-label{font-family:‘DM Mono’,monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(–text-dim);}
@@ -116,7 +116,7 @@ letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:color .2
 
 /* STATS */
 .stats-row{display:flex;gap:8px;padding:14px 16px 0;}
-.stat-card{flex:1;background:var(–surface);border:1px solid var(–border);border-radius:8px;padding:12px 10px;text-align:center;}
+.stat-card{flex:1;background:var(–surface);border:1px solid var(–border);border-radius:8px;padding:12px 10px;text-align:center;box-shadow:0 1px 4px rgba(60,35,10,0.08);}
 .stat-number{font-family:‘Cormorant Garamond’,serif;font-size:26px;font-weight:700;color:var(–accent);line-height:1;}
 .stat-label{font-family:‘DM Mono’,monospace;font-size:8px;letter-spacing:.09em;text-transform:uppercase;color:var(–text-dim);margin-top:4px;}
 
@@ -129,6 +129,7 @@ letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:color .2
 background:var(–surface);border:1px solid var(–border);border-radius:10px;
 overflow:hidden;transition:border-color .25s;
 animation:fadeUp .35s ease both;
+box-shadow: 0 1px 4px rgba(60,35,10,0.08), 0 0px 1px rgba(60,35,10,0.06);
 }
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .habit-item:nth-child(1){animation-delay:.04s}
@@ -190,7 +191,7 @@ letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s;
 .progress-header{padding:54px 20px 20px;border-bottom:1px solid var(–border);}
 .progress-title{font-family:‘Cormorant Garamond’,serif;font-size:32px;font-weight:700;color:#1a0e04;}
 .progress-section{padding:0 16px;}
-.level-card{background:var(–surface);border:1px solid var(–border2);border-radius:10px;padding:18px;margin:14px 0 10px;}
+.level-card{background:var(–surface);border:1px solid var(–border2);border-radius:10px;padding:18px;margin:14px 0 10px;box-shadow:0 1px 4px rgba(60,35,10,0.08);}
 .level-card-name{font-family:‘Cormorant Garamond’,serif;font-size:28px;font-weight:700;color:var(–gold);margin-bottom:2px;}
 .level-card-sub{font-family:‘DM Mono’,monospace;font-size:9px;letter-spacing:.08em;color:var(–text-dim);text-transform:uppercase;margin-bottom:16px;}
 .level-bar-track{height:3px;background:var(–border2);border-radius:2px;overflow:hidden;margin-bottom:7px;}
